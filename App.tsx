@@ -1,21 +1,14 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useVapi } from "./hooks/useVapi";
+import { StatusBar } from "./components/StatusBar";
 
 const App = () => {
   const { isConnected, isSpeaking, transcript, startCall, endCall } = useVapi();
 
   return (
     <View style={styles.container}>
-      <View style={styles.statusContainer}>
-        <Text style={styles.statusText}>
-          {isConnected
-            ? isSpeaking
-              ? "Assistant Speaking..."
-              : "Listening..."
-            : "Ready to start"}
-        </Text>
-      </View>
+      <StatusBar isConnected={isConnected} isSpeaking={isSpeaking} />
 
       <TouchableOpacity
         style={[
@@ -46,31 +39,15 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 16,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
     backgroundColor: "#f5f5f5",
-  },
-  statusContainer: {
-    marginBottom: 30,
-    padding: 16,
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  statusText: {
-    fontSize: 18,
-    fontWeight: "600",
-    textAlign: "center",
-    color: "#333",
+    gap: 16,
   },
   button: {
-    paddingHorizontal: 30,
-    paddingVertical: 15,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
     borderRadius: 25,
     minWidth: 200,
     alignItems: "center",
