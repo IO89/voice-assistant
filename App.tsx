@@ -1,63 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import Vapi from "@vapi-ai/react-native";
-
-interface TranscriptMessage {
-  role: string;
-  text: string;
-}
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useVapi } from "./hooks/useVapi";
 
 const App = () => {
-  const [vapi] = useState(() => new Vapi(process.env.EXPO_PUBLIC_VAPI_API_KEY));
-  const [isConnected, setIsConnected] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [transcript, setTranscript] = useState<TranscriptMessage[]>([]);
-
-  useEffect(() => {
-    // Set up event listeners
-    vapi.on("call-start", () => {
-      setIsConnected(true);
-    });
-
-    vapi.on("call-end", () => {
-      setIsConnected(false);
-      setIsSpeaking(false);
-    });
-
-    vapi.on("speech-start", () => {
-      setIsSpeaking(true);
-    });
-
-    vapi.on("speech-end", () => {
-      setIsSpeaking(false);
-    });
-
-    vapi.on("message", (message) => {
-      console.log(message);
-    });
-
-    vapi.on("error", (error) => {
-      console.error(error);
-      Alert.alert("Error", error.message);
-    });
-
-    return () => {
-      vapi.stop();
-    };
-  }, [vapi]);
-
-  const handleStartCall = async () => {
-    try {
-      await vapi.start(process.env.EXPO_PUBLIC_VAPI_ASSISTANT_ID);
-    } catch (error) {
-      Alert.alert("Error", "Failed to start call");
-      console.error("Call start error:", error);
-    }
-  };
-
-  const handleEndCall = () => {
-    vapi.stop();
-  };
+  const { isConnected, isSpeaking, transcript, startCall, endCall } = useVapi();
 
   return (
     <View style={styles.container}>
@@ -76,7 +22,7 @@ const App = () => {
           styles.button,
           isConnected ? styles.endButton : styles.startButton,
         ]}
-        onPress={isConnected ? handleEndCall : handleStartCall}
+        onPress={isConnected ? endCall : startCall}
       >
         <Text style={styles.buttonText}>
           {isConnected ? "End Call" : "🎤 Start Voice Call"}
