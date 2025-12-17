@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 import { useVapi } from "./hooks/useVapi";
 import { StatusBar } from "./components/StatusBar";
 
@@ -10,28 +16,46 @@ const App = () => {
     <View style={styles.container}>
       <StatusBar isConnected={isConnected} isSpeaking={isSpeaking} />
 
-      <TouchableOpacity
-        style={[
-          styles.button,
-          isConnected ? styles.endButton : styles.startButton,
-        ]}
-        onPress={isConnected ? endCall : startCall}
-      >
-        <Text style={styles.buttonText}>
-          {isConnected ? "End Call" : "🎤 Start Voice Call"}
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.content}>
+        <TouchableOpacity
+          style={[
+            styles.button,
+            isConnected ? styles.endButton : styles.startButton,
+          ]}
+          onPress={isConnected ? endCall : startCall}
+        >
+          <Text style={styles.buttonText}>
+            {isConnected ? "End Call" : "🎤 Start Voice Call"}
+          </Text>
+        </TouchableOpacity>
 
-      {transcript.length > 0 && (
-        <View style={styles.transcriptContainer}>
-          <Text style={styles.transcriptTitle}>Conversation:</Text>
-          {transcript.map((msg, index) => (
-            <Text key={index} style={styles.transcriptText}>
-              {msg.role}: {msg.text}
-            </Text>
-          ))}
-        </View>
-      )}
+        {transcript.length > 0 && !isConnected && (
+          <View style={styles.transcriptContainer}>
+            <Text style={styles.transcriptTitle}>Conversation:</Text>
+            <ScrollView
+              style={styles.scrollView}
+              showsVerticalScrollIndicator={true}
+            >
+              {transcript.map((msg, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.messageContainer,
+                    msg.role === "user"
+                      ? styles.userMessage
+                      : styles.assistantMessage,
+                  ]}
+                >
+                  <Text style={styles.roleText}>
+                    {msg.role === "user" ? "You" : "Assistant"}
+                  </Text>
+                  <Text style={styles.messageText}>{msg.text}</Text>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+      </View>
     </View>
   );
 };
@@ -39,11 +63,13 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  content: {
+    flex: 1,
     padding: 16,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
-    gap: 16,
   },
   button: {
     paddingHorizontal: 32,
@@ -70,11 +96,11 @@ const styles = StyleSheet.create({
   },
   transcriptContainer: {
     marginTop: 30,
-    padding: 15,
+    padding: 16,
     backgroundColor: "#fff",
     borderRadius: 10,
     width: "100%",
-    maxHeight: 200,
+    maxHeight: "60%",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -87,10 +113,34 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: "#333",
   },
-  transcriptText: {
-    fontSize: 14,
-    marginBottom: 5,
+  scrollView: {
+    flex: 1,
+  },
+  messageContainer: {
+    marginBottom: 12,
+    padding: 12,
+    borderRadius: 8,
+  },
+  userMessage: {
+    backgroundColor: "#e3f2fd",
+    alignSelf: "flex-end",
+    maxWidth: "80%",
+  },
+  assistantMessage: {
+    backgroundColor: "#f5f5f5",
+    alignSelf: "flex-start",
+    maxWidth: "80%",
+  },
+  roleText: {
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 4,
     color: "#666",
+  },
+  messageText: {
+    fontSize: 14,
+    color: "#333",
+    lineHeight: 20,
   },
 });
 

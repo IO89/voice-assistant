@@ -3,11 +3,12 @@ import { Alert } from "react-native";
 import Vapi from "@vapi-ai/react-native";
 
 interface TranscriptMessage {
-  role: string;
+  role: "user" | "assistant";
   text: string;
+  timestamp: Date;
 }
 
-interface VapiHookInterface {
+interface UseVapiReturn {
   isConnected: boolean;
   isSpeaking: boolean;
   transcript: TranscriptMessage[];
@@ -15,7 +16,7 @@ interface VapiHookInterface {
   endCall: () => void;
 }
 
-export const useVapi = (): VapiHookInterface => {
+export const useVapi = (): UseVapiReturn => {
   const [vapi] = useState(() => new Vapi(process.env.EXPO_PUBLIC_VAPI_API_KEY));
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -24,6 +25,7 @@ export const useVapi = (): VapiHookInterface => {
   useEffect(() => {
     vapi.on("call-start", () => {
       setIsConnected(true);
+      setTranscript([]);
     });
 
     vapi.on("call-end", () => {
@@ -41,17 +43,21 @@ export const useVapi = (): VapiHookInterface => {
 
     vapi.on("message", (message) => {
       console.log("message", message);
+      if (message.type === "transcript" && message.transcriptType === "final") {
+        setTranscript((prev) => [
+          ...prev,
+          {
+            role: message.role,
+            text: message.transcript,
+            timestamp: new Date(),
+          },
+        ]);
+      }
     });
 
     vapi.on("error", (error) => {
-      if (error.code === "PERMISSION_DENIED") {
-        Alert.alert(
-          "Permission Required",
-          "Please grant microphone permissions",
-        );
-      } else if (error.code === "NETWORK_ERROR") {
-        Alert.alert("Network Error", "Please check your internet connection");
-      }
+      console.error(error);
+      Alert.alert("Error", error.message);
     });
 
     return () => {
