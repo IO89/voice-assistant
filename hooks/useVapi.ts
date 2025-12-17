@@ -40,12 +40,18 @@ export const useVapi = (): VapiHookInterface => {
     });
 
     vapi.on("message", (message) => {
-      console.log(message);
+      console.log("message", message);
     });
 
     vapi.on("error", (error) => {
-      console.error(error);
-      Alert.alert("Error", error.message);
+      if (error.code === "PERMISSION_DENIED") {
+        Alert.alert(
+          "Permission Required",
+          "Please grant microphone permissions",
+        );
+      } else if (error.code === "NETWORK_ERROR") {
+        Alert.alert("Network Error", "Please check your internet connection");
+      }
     });
 
     return () => {
