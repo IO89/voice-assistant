@@ -14,3 +14,4 @@ It is required to add env varibales needed for Vapi
 ```bash
 cp .env.example .env.local # update with your credentials
 ```
+> Turbomodules do not work on android you would need to disable new architecture
