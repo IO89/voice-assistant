@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Alert } from "react-native";
 import Vapi from "@vapi-ai/react-native";
+import { useMicrophonePermission } from "./useRequestPermissions";
 
 interface TranscriptMessage {
   role: "user" | "assistant";
@@ -22,6 +23,34 @@ export const useVapi = (): UseVapiReturn => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState<TranscriptMessage[]>([]);
   const lastTranscriptRef = useRef<{ role: string; text: string } | null>(null);
+
+  const { permissionStatus, requestPermission, checkPermission, openSettings } =
+    useMicrophonePermission();
+
+  const showPermissionAlert = useCallback(
+    (isBlocked: boolean) => {
+      Alert.alert(
+        "Microphone Permission Required",
+        isBlocked
+          ? "Microphone permission is permanently blocked. Please enable it in your device settings to make voice calls."
+          : "Microphone access is required to make voice calls. Please grant permission to continue.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: isBlocked ? "Open Settings" : "Grant Permission",
+            onPress: async () => {
+              if (isBlocked) {
+                openSettings();
+              } else {
+                await requestPermission();
+              }
+            },
+          },
+        ],
+      );
+    },
+    [openSettings, requestPermission],
+  );
 
   useEffect(() => {
     vapi.on("call-start", () => {
@@ -68,23 +97,51 @@ export const useVapi = (): UseVapiReturn => {
     });
 
     vapi.on("error", (error) => {
-      console.error(error);
-      Alert.alert("Error", error.message);
+      console.error("Vapi error:", error);
+
+      if (error.code === "PERMISSION_DENIED") {
+        showPermissionAlert(permissionStatus === "blocked");
+      } else if (error.code === "NETWORK_ERROR") {
+        Alert.alert("Network Error", "Please check your internet connection");
+      } else {
+        Alert.alert("Error", error.message || "An unexpected error occurred");
+      }
     });
 
     return () => {
       vapi.stop();
     };
-  }, [vapi]);
+  }, [vapi, permissionStatus, showPermissionAlert]);
 
   const startCall = useCallback(async () => {
     try {
+      // Step 1: Check current permission status
+      const hasPermission = await checkPermission();
+
+      // Step 2: If no permission, request it
+      if (!hasPermission) {
+        const granted = await requestPermission();
+
+        // Step 3: If still not granted after request, show alert
+        if (!granted) {
+          showPermissionAlert(permissionStatus === "blocked");
+          return; // Exit - don't proceed with call
+        }
+      }
+
+      // Step 4: Permission is granted, start the call
       await vapi.start(process.env.EXPO_PUBLIC_VAPI_ASSISTANT_ID);
     } catch (error) {
-      Alert.alert("Error", "Failed to start call, please try again later");
       console.error("Call start error:", error);
+      Alert.alert("Error", "Failed to start call. Please try again.");
     }
-  }, [vapi]);
+  }, [
+    vapi,
+    checkPermission,
+    requestPermission,
+    permissionStatus,
+    showPermissionAlert,
+  ]);
 
   const endCall = useCallback(() => {
     vapi.stop();

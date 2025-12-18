@@ -14,6 +14,7 @@ export const CallButton: React.FC<CallButtonProps> = ({
   onEndCall,
 }) => {
   const { hasGoodConnection } = useNetworkStatus();
+
   return (
     <TouchableOpacity
       style={[
@@ -50,12 +51,12 @@ const styles = StyleSheet.create({
   endButton: {
     backgroundColor: "#ef4444",
   },
+  disabledButton: {
+    opacity: 0.5,
+  },
   buttonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
-  },
-  disabledButton: {
-    opacity: 0.5,
   },
 });
