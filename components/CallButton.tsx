@@ -1,5 +1,6 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { useNetworkStatus } from "../hooks/useNetworkStatus";
 
 interface CallButtonProps {
   isConnected: boolean;
@@ -12,12 +13,15 @@ export const CallButton: React.FC<CallButtonProps> = ({
   onStartCall,
   onEndCall,
 }) => {
+  const { hasGoodConnection } = useNetworkStatus();
   return (
     <TouchableOpacity
       style={[
         styles.button,
         isConnected ? styles.endButton : styles.startButton,
+        !hasGoodConnection && styles.disabledButton,
       ]}
+      disabled={!hasGoodConnection}
       onPress={isConnected ? onEndCall : onStartCall}
     >
       <Text style={styles.buttonText}>
@@ -50,5 +54,8 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });
