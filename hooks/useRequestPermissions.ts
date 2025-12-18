@@ -83,7 +83,6 @@ export const useMicrophonePermission = (): UseMicrophonePermission => {
     return true;
   }, []);
 
-  // Check permission on mount
   useEffect(() => {
     checkPermission();
   }, [checkPermission]);
