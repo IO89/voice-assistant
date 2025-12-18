@@ -8,55 +8,58 @@ import {
 } from "react-native";
 import { useVapi } from "./hooks/useVapi";
 import { StatusBar } from "./components/StatusBar";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const App = () => {
   const { isConnected, isSpeaking, transcript, startCall, endCall } = useVapi();
 
   return (
-    <View style={styles.container}>
-      <StatusBar isConnected={isConnected} isSpeaking={isSpeaking} />
+    <SafeAreaProvider>
+      <View style={styles.container}>
+        <StatusBar isConnected={isConnected} isSpeaking={isSpeaking} />
 
-      <View style={styles.content}>
-        <TouchableOpacity
-          style={[
-            styles.button,
-            isConnected ? styles.endButton : styles.startButton,
-          ]}
-          onPress={isConnected ? endCall : startCall}
-        >
-          <Text style={styles.buttonText}>
-            {isConnected ? "End Call" : "🎤 Start Voice Call"}
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.content}>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              isConnected ? styles.endButton : styles.startButton,
+            ]}
+            onPress={isConnected ? endCall : startCall}
+          >
+            <Text style={styles.buttonText}>
+              {isConnected ? "End Call" : "🎤 Start Voice Call"}
+            </Text>
+          </TouchableOpacity>
 
-        {transcript.length > 0 && !isConnected && (
-          <View style={styles.transcriptContainer}>
-            <Text style={styles.transcriptTitle}>Conversation:</Text>
-            <ScrollView
-              style={styles.scrollView}
-              showsVerticalScrollIndicator={true}
-            >
-              {transcript.map((msg, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.messageContainer,
-                    msg.role === "user"
-                      ? styles.userMessage
-                      : styles.assistantMessage,
-                  ]}
-                >
-                  <Text style={styles.roleText}>
-                    {msg.role === "user" ? "You" : "Assistant"}
-                  </Text>
-                  <Text style={styles.messageText}>{msg.text}</Text>
-                </View>
-              ))}
-            </ScrollView>
-          </View>
-        )}
+          {transcript.length > 0 && !isConnected && (
+            <View style={styles.transcriptContainer}>
+              <Text style={styles.transcriptTitle}>Conversation:</Text>
+              <ScrollView
+                style={styles.scrollView}
+                showsVerticalScrollIndicator={true}
+              >
+                {transcript.map((msg, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.messageContainer,
+                      msg.role === "user"
+                        ? styles.userMessage
+                        : styles.assistantMessage,
+                    ]}
+                  >
+                    <Text style={styles.roleText}>
+                      {msg.role === "user" ? "You" : "Assistant"}
+                    </Text>
+                    <Text style={styles.messageText}>{msg.text}</Text>
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+        </View>
       </View>
-    </View>
+    </SafeAreaProvider>
   );
 };
 

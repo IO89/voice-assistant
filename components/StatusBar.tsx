@@ -19,7 +19,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={["top"]}>
       <View style={styles.container}>
         <Text style={styles.text}>{getStatusText()}</Text>
       </View>
@@ -28,9 +28,6 @@ export const StatusBar: React.FC<StatusBarProps> = ({
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: "#fff",
-  },
   container: {
     width: "100%",
     padding: 16,
