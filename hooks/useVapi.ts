@@ -9,7 +9,7 @@ interface TranscriptMessage {
   timestamp: Date;
 }
 
-interface UseVapiReturn {
+interface UseVapi {
   isConnected: boolean;
   isSpeaking: boolean;
   transcript: TranscriptMessage[];
@@ -17,7 +17,7 @@ interface UseVapiReturn {
   endCall: () => void;
 }
 
-export const useVapi = (): UseVapiReturn => {
+export const useVapi = (): UseVapi => {
   const [vapi] = useState(() => new Vapi(process.env.EXPO_PUBLIC_VAPI_API_KEY));
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -115,21 +115,17 @@ export const useVapi = (): UseVapiReturn => {
 
   const startCall = useCallback(async () => {
     try {
-      // Step 1: Check current permission status
       const hasPermission = await checkPermission();
 
-      // Step 2: If no permission, request it
       if (!hasPermission) {
         const granted = await requestPermission();
 
-        // Step 3: If still not granted after request, show alert
         if (!granted) {
           showPermissionAlert(permissionStatus === "blocked");
-          return; // Exit - don't proceed with call
+          return;
         }
       }
 
-      // Step 4: Permission is granted, start the call
       await vapi.start(process.env.EXPO_PUBLIC_VAPI_ASSISTANT_ID);
     } catch (error) {
       console.error("Call start error:", error);

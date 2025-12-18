@@ -7,14 +7,14 @@ export type PermissionStatus =
   | "blocked"
   | "undetermined";
 
-interface UseMicrophonePermissionReturn {
+interface UseMicrophonePermission {
   permissionStatus: PermissionStatus;
   requestPermission: () => Promise<boolean>;
   checkPermission: () => Promise<boolean>;
   openSettings: () => void;
 }
 
-export const useMicrophonePermission = (): UseMicrophonePermissionReturn => {
+export const useMicrophonePermission = (): UseMicrophonePermission => {
   const [permissionStatus, setPermissionStatus] =
     useState<PermissionStatus>("undetermined");
 
@@ -43,7 +43,6 @@ export const useMicrophonePermission = (): UseMicrophonePermissionReturn => {
       }
     }
 
-    // iOS permissions are handled automatically
     setPermissionStatus("granted");
     return true;
   }, []);
