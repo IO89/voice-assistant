@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Alert } from "react-native";
 import Vapi from "@vapi-ai/react-native";
 
@@ -21,11 +21,13 @@ export const useVapi = (): UseVapiReturn => {
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState<TranscriptMessage[]>([]);
+  const lastTranscriptRef = useRef<{ role: string; text: string } | null>(null);
 
   useEffect(() => {
     vapi.on("call-start", () => {
       setIsConnected(true);
       setTranscript([]);
+      lastTranscriptRef.current = null;
     });
 
     vapi.on("call-end", () => {
@@ -42,16 +44,26 @@ export const useVapi = (): UseVapiReturn => {
     });
 
     vapi.on("message", (message) => {
-      console.log("message", message);
       if (message.type === "transcript" && message.transcriptType === "final") {
-        setTranscript((prev) => [
-          ...prev,
-          {
+        const isDuplicate =
+          lastTranscriptRef.current?.role === message.role &&
+          lastTranscriptRef.current?.text === message.transcript;
+
+        if (!isDuplicate) {
+          lastTranscriptRef.current = {
             role: message.role,
             text: message.transcript,
-            timestamp: new Date(),
-          },
-        ]);
+          };
+
+          setTranscript((prev) => [
+            ...prev,
+            {
+              role: message.role,
+              text: message.transcript,
+              timestamp: new Date(),
+            },
+          ]);
+        }
       }
     });
 
@@ -69,7 +81,7 @@ export const useVapi = (): UseVapiReturn => {
     try {
       await vapi.start(process.env.EXPO_PUBLIC_VAPI_ASSISTANT_ID);
     } catch (error) {
-      Alert.alert("Error", "Failed to start call");
+      Alert.alert("Error", "Failed to start call, please try again later");
       console.error("Call start error:", error);
     }
   }, [vapi]);

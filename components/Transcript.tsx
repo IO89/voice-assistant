@@ -20,10 +20,16 @@ export const Transcript: React.FC<TranscriptViewProps> = ({
     return null;
   }
 
+  console.log({ transcript });
+
   return (
     <View style={styles.transcriptContainer}>
       <Text style={styles.transcriptTitle}>Conversation:</Text>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={true}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={true}
+      >
         {transcript.map((msg, index) => (
           <View
             key={index}
@@ -52,7 +58,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 10,
     width: "100%",
-    maxHeight: "60%",
+    maxHeight: 400,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -66,7 +72,11 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   scrollView: {
-    flex: 1,
+    flexGrow: 0,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 8,
   },
   messageContainer: {
     marginBottom: 12,
