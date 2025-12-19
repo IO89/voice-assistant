@@ -35,3 +35,5 @@ While testing noticed that micropone was registering different noise and conside
 Support for different languages would be good improvement
 
 Unify permission request and retry for both platforms.
+
+Offline mode where user records audio message that is stored locally and then it is synced to vapi service once connection is stable.
